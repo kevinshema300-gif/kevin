@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smiley Hacker → DJ</title>
+  <meta name="description" content="Single-file page: smiley background, hacker options, big smile emoji that continues to a DJ section." />
+  <style>
+    :root{--bg:#05060a;--neon:#00ff9d;--accent:#66e0ff;--muted:#9aa6ac;--card:rgba(255,255,255,0.02);--mono:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:#e6fbf2;font-family:Inter, system-ui, -apple-system, Roboto, Arial, sans-serif}
+
+    /* Only smiley tiled background (large, repeating) */
+    body::before{
+      content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220"><rect width="220" height="220" fill="%23020a0f"/><g fill="%23ffff66" opacity="0.08"><circle cx="110" cy="92" r="72"/><ellipse cx="86" cy="82" rx="8" ry="10"/><ellipse cx="132" cy="82" rx="8" ry="10"/><path d="M76 128 Q110 158 144 128" stroke="%23ffff66" stroke-width="6" fill="none" stroke-linecap="round"/></g></svg>');
+      background-repeat:repeat; transform:scale(1.0); filter:blur(4px) saturate(1.2);
+    }
+
+    /* subtle overlay gradient to keep content readable */
+    .overlay{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.6));}
+
+    .wrap{position:relative;z-index:1;max-width:1100px;margin:28px auto;padding:20px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--neon),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;color:#001;font-family:var(--mono)}
+    h1{margin:0;font-family:var(--mono);font-size:20px}
+    .lead{color:var(--muted);font-size:13px}
+
+    /* Layout */
+    main{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:20px}
+    .panel{background:var(--card);border-radius:12px;padding:16px;backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,0.03)}
+
+    /* Center stage: big emoji */
+    .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:520px;gap:14px;text-align:center}
+    .big-smile{font-size:120px;cursor:pointer;filter:drop-shadow(0 10px 30px rgba(0,255,157,0.08));transition:transform .24s ease, filter .24s}
+    .big-smile:hover{transform:scale(1.06)}
+    .small{color:var(--muted)}
+
+    /* Hacker options list */
+    .options{display:flex;flex-direction:column;gap:10px}
+    .opt{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02)}
+    .opt button{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;color:var(--neon);cursor:pointer}
+
+    /* Terminal area inside left panel */
+    .terminal{background:rgba(0,0,0,0.45);padding:12px;border-radius:8px;font-family:var(--mono);font-size:13px;color:var(--neon);min-height:160px;overflow:auto}
+    .term-line{white-space:pre-wrap}
+
+    /* DJ section */
+    #dj{margin-top:28px;padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+    .dj-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pad{width:76px;height:76px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.02);cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
+    .btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--neon);cursor:pointer}
+
+    footer{margin-top:20px;color:var(--muted);text-align:center}
+
+    @media (max-width:980px){main{grid-template-columns:1fr} .big-smile{font-size:88px}}
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">:)</div>
+        <div>
+          <h1>Smiley Hacker — one page</h1>
+          <div class="lead">Click the big smile to continue to the DJ area. Hacker options on the right.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="lead">Ready</div>
+        <button class="btn" id="copyPage">Copy page HTML</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="stage">
+          <div id="smileBtn" class="big-smile" title="Click to go to DJ section">😄</div>
+          <div class="small">Big smile — click to continue to DJ controls (below)</div>
+
+          <div style="width:100%;max-width:760px;margin-top:6px">
+            <div class="terminal" id="terminal"> 
+              <div class="term-line">user@smiley:~$ Type Ctrl+Enter to run a quick command (e.g. <code>help</code>)</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn" id="cmdHelp">Help</button>
+              <button class="btn" id="cmdScan">Fake Scan</button>
+              <button class="btn" id="toggleMatrix">Toggle Matrix</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DJ target anchor -->
+        <div id="dj" aria-label="DJ section">
+          <h3 style="margin-top:0">DJ Deck — Simple Web Audio Mixer</h3>
+          <p class="small">This is an in-page DJ demo. Clicking the smile scrolls here and starts a little beat. Use pads for sounds.</p>
+          <div class="dj-controls" style="margin-top:10px">
+            <button class="btn" id="playBeat">Play Beat</button>
+            <button class="btn" id="stopBeat">Stop</button>
+            <label style="display:flex;align-items:center;gap:8px"><span class="small">BPM</span><input id="bpm" type="range" min="60" max="160" value="100"></label>
+            <label style="display:flex;align-items:center;gap:8px"><span class="small">Volume</span><input id="volume" type="range" min="0" max="1" step="0.01" value="0.6"></label>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <div class="pad" data-sound="kick">KICK</div>
+            <div class="pad" data-sound="snare">SNARE</div>
+            <div class="pad" data-sound="hat">HAT</div>
+            <div class="pad" data-sound="bass">BASS</div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <aside class="panel">
+        <h4 style="margin-top:0">Hacker options</h4>
+        <div class="options">
+          <div class="opt"><div>Terminal (log)</div><button id="openTerm">Open</button></div>
+          <div class="opt"><div>Payload editor</div><button id="openPayload">Open</button></div>
+          <div class="opt"><div>Export HTML</div><button id="exportHtml">Export</button></div>
+          <div class="opt"><div>Fake network scan</div><button id="netScan">Scan</button></div>
+          <div class="opt"><div>Toggle background rain</div><button id="toggleRainSide">Toggle</button></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <h4 style="margin-bottom:8px">Payload</h4>
+          <textarea id="payloadArea" rows="6" style="width:100%;border-radius:8px;padding:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.03);color:var(--neon);font-family:var(--mono)">// write something harmless
+console.log('smile');
+</textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" id="runPayload">Preview</button>
+            <button class="btn" id="clearPayload">Clear</button>
+          </div>
+        </div>
+
+      </aside>
+    </main>
+
+    <footer>Made for you — single file. Be ethical with hacker tools.</footer>
+  </div>
+
+  <script>
+    // Smooth scroll to DJ and start a small beat
+    const smileBtn = document.getElementById('smileBtn');
+    const dj = document.getElementById('dj');
+    const terminal = document.getElementById('terminal');
+    const cmdHelp = document.getElementById('cmdHelp');
+    const cmdScan = document.getElementById('cmdScan');
+    const toggleMatrixBtn = document.getElementById('toggleMatrix');
+    const openTerm = document.getElementById('openTerm');
+    const openPayload = document.getElementById('openPayload');
+    const exportHtml = document.getElementById('exportHtml');
+    const netScan = document.getElementById('netScan');
+    const toggleRainSide = document.getElementById('toggleRainSide');
+    const payloadArea = document.getElementById('payloadArea');
+    const runPayload = document.getElementById('runPayload');
+    const clearPayload = document.getElementById('clearPayload');
+    const copyPage = document.getElementById('copyPage');
+
+    // Web Audio setup for DJ
+    let audioCtx = null;
+    let masterGain = null;
+    let beatTimer = null;
+    let bpmInput = document.getElementById('bpm');
+    let volInput = document.getElementById('volume');
+
+    function ensureAudio(){
+      if(!audioCtx){
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain(); masterGain.gain.value = parseFloat(volInput.value); masterGain.connect(audioCtx.destination);
+      }
+    }
+
+    function playKick(time){
+      ensureAudio();
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = 'sine'; osc.frequency.setValueAtTime(120, time);
+      g.gain.setValueAtTime(1, time);
+      g.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(time); osc.stop(time + 0.3);
+    }
+    function playSnare(time){
+      ensureAudio();
+      const noise = audioCtx.createBufferSource();
+      const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0); for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1)*Math.exp(-i/data.length*4);
+      noise.buffer = buffer; const g = audioCtx.createGain(); g.gain.setValueAtTime(1, time); g.gain.exponentialRampToValueAtTime(0.01, time+0.2);
+      noise.connect(g); g.connect(masterGain); noise.start(time); noise.stop(time+0.2);
+    }
+    function playHat(time){
+      ensureAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(8000, time); g.gain.setValueAtTime(0.18, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.06); o.connect(g); g.connect(masterGain); o.start(time); o.stop(time+0.06);
+    }
+    function playBass(time){ ensureAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(55, time); g.gain.setValueAtTime(0.15, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.25); o.connect(g); g.connect(masterGain); o.start(time); o.stop(time+0.3); }
+
+    function startBeat(){
+      if(beatTimer) return; ensureAudio();
+      let idx = 0; const schedule = ()=>{
+        const bpm = parseInt(bpmInput.value); const interval = 60 / bpm; const now = audioCtx.currentTime;
+        playKick(now + 0.01);
+        setTimeout(()=>playSnare(audioCtx.currentTime + 0.01), interval*250);
+      };
+      beatTimer = setInterval(()=>{
+        const now = audioCtx.currentTime;
+        playKick(now+0.01); setTimeout(()=>playHat(audioCtx.currentTime+0.01), 0.12); setTimeout(()=>playSnare(audioCtx.currentTime+0.01), 0.28);
+      }, (60/parseInt(bpmInput.value))*1000);
+    }
+    function stopBeat(){ if(beatTimer){ clearInterval(beatTimer); beatTimer = null; } }
+
+    document.getElementById('playBeat').addEventListener('click', ()=>{ startBeat(); });
+    document.getElementById('stopBeat').addEventListener('click', ()=>{ stopBeat(); });
+    volInput.addEventListener('input', ()=>{ if(masterGain) masterGain.gain.value = parseFloat(volInput.value); });
+    bpmInput.addEventListener('input', ()=>{ if(beatTimer){ stopBeat(); startBeat(); } });
+
+    // Pad clicks
+    document.querySelectorAll('.pad').forEach(p=>{
+      p.addEventListener('click', ()=>{
+        const s = p.dataset.sound;
+        const t = audioCtx ? audioCtx.currentTime : 0;
+        if(s==='kick') playKick(t+0.01);
+        if(s==='snare') playSnare(t+0.01);
+        if(s==='hat') playHat(t+0.01);
+        if(s==='bass') playBass(t+0.01);
+      });
+    });
+
+    // Smile click -> scroll to DJ and play small intro
+    smileBtn.addEventListener('click', ()=>{
+      dj.scrollIntoView({behavior:'smooth', block:'center'});
+      // small intro: start a short sequence
+      ensureAudio(); const now = audioCtx.currentTime; playKick(now+0.05); playHat(now+0.08); playSnare(now+0.18);
+    });
+
+    // Terminal buttons
+    cmdHelp.addEventListener('click', ()=>{ terminal.innerHTML += '\nhelp: commands: help, scan, echo'; terminal.scrollTop = terminal.scrollHeight; });
+    cmdScan.addEventListener('click', ()=>{ terminal.innerHTML += '\nrunning fake network scan...\n[ok] 192.168.0.1 - alive\n[ok] 192.168.0.7 - alive\n[done]'; terminal.scrollTop = terminal.scrollHeight; });
+    toggleMatrixBtn.addEventListener('click', ()=>{ terminal.innerHTML += '\nMatrix toggled (visual effect not available in this simple demo)'; terminal.scrollTop = terminal.scrollHeight; });
+
+    openTerm.addEventListener('click', ()=>{ alert('Terminal opened — use the small terminal area for logs.'); });
+    openPayload.addEventListener('click', ()=>{ payloadArea.focus(); });
+    exportHtml.addEventListener('click', ()=>{ const data = '<!doctype html>\n'+document.documentElement.outerHTML; const blob = new Blob([data], {type:'text/html'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='smiley-hacker-dj.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+
+    netScan.addEventListener('click', ()=>{ terminal.innerHTML += '\nstarting fake port scan...\nport 22: open\nport 80: open\nport 443: open\nscan complete'; terminal.scrollTop = terminal.scrollHeight; });
+    toggleRainSide.addEventListener('click', ()=>{ const ov = document.querySelector('.overlay'); if(ov.style.opacity === '0.0') ov.style.opacity='1'; else ov.style.opacity='0.0'; });
+
+    runPayload.addEventListener('click', ()=>{ // safe preview only
+      const txt = payloadArea.value; terminal.innerHTML += '\n--- payload preview ---\n'+txt+'\n--- end ---'; terminal.scrollTop = terminal.scrollHeight; });
+    clearPayload.addEventListener('click', ()=>{ payloadArea.value = ''; });
+
+    copyPage.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText('<!doctype html>\n'+document.documentElement.outerHTML); alert('Page HTML copied. Paste into index.html'); }catch(e){ alert('Copy failed: ' + e.message); }
+    });
+
+    // keyboard shortcut: Ctrl/Cmd+Enter opens prompt for a command
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
+        const cmd = prompt('Enter command (help, scan, playbeat)'); if(!cmd) return; const c = cmd.trim().toLowerCase(); if(c==='help') cmdHelp.click(); if(c==='scan') cmdScan.click(); if(c==='playbeat') document.getElementById('playBeat').click();
+      }
+    });
+
+  </script>
+</body>
+</html>

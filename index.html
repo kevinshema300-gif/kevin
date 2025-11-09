@@ -1,13 +1,234 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kelvain-empire</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Imyenda & Inkweto — Adidas Collection</title>
+  <style>
+    :root{
+      --bg:#10160e;
+      --card:#0b1220;
+      --accent:#070d44;
+      --accent2:#9b5cff;
+      --muted:#9aa4b2;
+      --glass: rgba(0,255,089,0.04);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(155,92,255,0.08), transparent),
+                  radial-gradient(900px 450px at 90% 80%, rgba(0,212,255,0.04), transparent),
+                  var(--bg);
+      color:#e6eef8; -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+      display:flex;flex-direction:column;
+    }
+    header{
+      position:relative;z-index:10;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;
+      backdrop-filter: blur(6px);
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:grid;place-items:center;font-weight:700;color:#04111a;font-size:18px;box-shadow:0 6px 18px rgba(0,0,0,0.6);
+    }
+    nav a{color:var(--muted);text-decoration:none;margin-left:18px}
+    nav a:hover{color:var(--accent)}
+
+    /* Hero */
+    .hero{
+      display:grid;grid-template-columns:1fr 460px;gap:40px;align-items:center;padding:40px 28px 60px;max-width:1200px;margin:0 auto;width:100%;
+    }
+    .hero-left h1{font-size:40px;margin:0 0 12px;line-height:1.02;color:#2319a7}
+    .hero-left p{color:var(--muted);margin:0 0 20px}
+    .buttons{display:flex;gap:12px}
+    .btn{padding:12px 18px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#04111a;font-weight:700;border:none;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+    /* Card with video */
+    .hero-right{position:relative}
+    .showcase{border-radius:16px;overflow:hidden;background:var(--card);box-shadow:0 10px 30px rgba(2,6,23,0.6);position:relative}
+    .showcase video{width:100%;height:100%;object-fit:cover;display:block}
+    .ribbon{position:absolute;left:12px;top:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:999px;font-weight:700;color:#04111a}
+
+    /* Products grid */
+    .products{max-width:1200px;margin:20px auto 80px;padding:0 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:14px;border-radius:12px;backdrop-filter:blur(6px);position:relative;overflow:hidden}
+    .card img{width:100%;height:240px;object-fit:cover;border-radius:10px}
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+    .meta h3{margin:0;font-size:16px}
+    .price{font-weight:700;color:var(--accent)}
+    .tag{position:absolute;right:10px;top:10px;background:rgba(0,0,0,0.28);padding:6px 10px;border-radius:999px;font-size:12px}
+
+    /* Floating bubbles animation */
+    .bubbles{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .bubble{position:absolute;border-radius:50%;opacity:0.12;filter:blur(6px);mix-blend-mode:screen}
+    .bubble.one{width:260px;height:260px;background:linear-gradient(180deg,var(--accent),transparent);left:-40px;top:40px;animation:float 8s ease-in-out infinite}
+    .bubble.two{width:160px;height:160px;background:linear-gradient(180deg,var(--accent2),transparent);right:-20px;bottom:100px;animation:float 10s ease-in-out infinite}
+    .bubble.three{width:100px;height:100px;background:linear-gradient(180deg,#ff7ab6,transparent);left:20%;bottom:10%;animation:float 12s ease-in-out infinite}
+    @keyframes float{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-18px) rotate(8deg)}100%{transform:translateY(0) rotate(0)}}
+
+    /* Footer */
+    footer{padding:26px 28px;border-top:1px solid rgba(255,255,255,0.02);margin-top:auto;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+
+    /* Responsive */
+    @media (max-width:920px){
+      .hero{grid-template-columns:1fr;gap:22px}
+      .hero-right{order:-1}
+      .hero-right .showcase{height:260px}
+    }
+    @media (max-width:480px){
+      .hero-left h1{font-size:28px}
+      .meta img{height:200px}
+    }
+
+    /* subtle entrance animation */
+    .fade-in{animation:fadeInUp 700ms ease both}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+    /* hover zoom */
+    .card:hover img{transform:scale(1.03);transition:transform 450ms ease}
+    .card img{transition:transform 450ms ease}
+
+  </style>
+</head>
+<body>
+  <div class="bubbles" aria-hidden="true">
+    <div class="bubble one"></div>
+    <div class="bubble two"></div>
+    <div class="bubble three"></div>
+  </div>
+
+  <header>
+    <div class="brand">
+      <div class="logo">AD</div>
+      <div>
+        <div style="font-weight:700">Adidas Store</div>
+        <div style="font-size:12px;color:var(--muted)">Imyenda n'inkweto za Adidas</div>
+      </div>
+    </div>
+    <nav>
+      <a href="#products">Products</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" role="region" aria-label="Hero">
+      <div class="hero-left fade-in">
+        <h1>Imyenda Inoze & Inkweto za Adidas<br><span style="font-size:18px;color:var(--muted)">Gira style, wiyumvemo neza</span></h1>
+        <p>Reba collections nshya za Adidas: T-shirts, jackets, sneakers, na sportswear. Gutanga kuri delivery mu Rwanda hose.</p>
+        <div class="buttons">
+          <button class="btn">Reba Collection</button>
+          <button class="btn ghost">Vuga na Support</button>
+        </div>
+        <p style="margin-top:14px;color:var(--muted);font-size:13px">Free returns within 14 days • Secure payments</p>
+      </div>
+
+      <div class="hero-right fade-in">
+        <div class="showcase" style="height:320px">
+          <div class="ribbon">NEW</div>
+          <!-- Video: sample Pexels video - replace with your own -->
+          <video playsinline autoplay muted loop poster="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg">
+            <source src="https://player.vimeo.com/external/449098394.sd.mp4?s=6c7d0d1a1d1c3d5f2a6c2b8a1b3f7b3c5e2d3a1b&profile_id=165" type="video/mp4">
+            <!-- fallback image -->
+          </video>
+        </div>
+      </div>
+    </section>
+
+    <section id="products" class="products" aria-label="Products">
+      <article class="card fade-in">
+        <span class="tag">Hot</span>
+        <img src="https://images.unsplash.com/photo-1520975682896-a6d7c92c3c3b?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.0.3&s=abcd" alt="Adidas Sneakers" />
+        <div class="meta">
+          <h3>Adidas Ultraboost</h3>
+          <div class="price">$140</div>
+        </div>
+      </article>
+
+      <article class="card fade-in">
+        <img src="https://images.unsplash.com/photo-1520975913073-6a6ee6d0d8a5?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.0.3&s=efgh" alt="Adidas Jacket" />
+        <div class="meta">
+          <h3>Training Jacket</h3>
+          <div class="price">$85</div>
+        </div>
+      </article>
+
+      <article class="card fade-in">
+        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.0.3&s=ijkl" alt="T-Shirt" />
+        <div class="meta">
+          <h3>Classic Tee</h3>
+          <div class="price">$28</div>
+        </div>
+      </article>
+
+      <article class="card fade-in">
+        <img src="https://images.unsplash.com/photo-1521335629791-ce4aec67ddaf?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.0.3&s=mnop" alt="Adidas Trackpants" />
+        <div class="meta">
+          <h3>Track Pants</h3>
+          <div class="price">$60</div>
+        </div>
+      </article>
+
+      <article class="card fade-in">
+        <img src="https://images.unsplash.com/photo-1503342217505-b0a15be7b2b6?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.0.3&s=qrst" alt="Adidas Kids" />
+        <div class="meta">
+          <h3>Kids Collection</h3>
+          <div class="price">$45</div>
+        </div>
+      </article>
+
+      <article class="card fade-in">
+        <img src="https://images.unsplash.com/photo-1526178612134-3f4c3f84e9f9?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.0.3&s=uvwx" alt="Adidas Hoodie" />
+        <div class="meta">
+          <h3>Cozy Hoodie</h3>
+          <div class="price">$75</div>
+        </div>
+      </article>
+
+    </section>
+
+    <section id="about" style="max-width:1200px;margin:0 auto;padding:0 28px 40px;">
+      <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;min-width:280px;background:var(--glass);padding:18px;border-radius:12px">
+          <h3 style="margin-top:0">Kubijyanye natwe</h3>
+          <p style="color:var(--muted)">Dutanga ibintu byiza kandi byizewe. Kugura biroroshye — shyira mu cart, wishyure ukoresheje Mobile Money cyangwa bank transfer, maze twohereze aho uri mu Rwanda.</p>
+          <ul style="color:var(--muted)">
+            <li>Delivery mu masaha 48 mu mijyi</li>
+            <li>Guhindura/kugarura mu minsi 14</li>
+            <li>Support 24/7</li>
+          </ul>
+        </div>
+        <div style="flex:1;min-width:280px;border-radius:12px;overflow:hidden">
+          <!-- Example embedded YouTube video - replace with your video URL if desired -->
+          <iframe width="100%" height="220" src="https://www.youtube.com/embed/5lQ8s5j6qA4" title="Adidas Promo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;" allowfullscreen></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" style="max-width:1200px;margin:0 auto;padding:0 28px 80px;">
+      <div style="background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:18px;border-radius:12px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+        <div style="flex:1;min-width:220px">
+          <h3 style="margin:0">Twandikire</h3>
+          <p style="color:var(--muted);margin-top:8px">Umva neza, dufite abakozi bazaguha support kuri order zawe.</p>
+        </div>
+        <form style="display:flex;gap:8px;flex:2;min-width:280px;flex-wrap:wrap" onsubmit="event.preventDefault();alert('Message yoherejwe — substitute this with real backend')">
+          <input required placeholder="Izina" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" />
+          <input required placeholder="Email / Nomero" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" />
+          <button class="btn" style="padding:10px 14px;border-radius:10px">Ohereza</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>© 2025 Adidas Store — Made with ♥</div>
+    <div style="color:var(--muted)">Payment: Mobile Money, Bank, Card</div>
+  </footer>
+
+</body>
 </html>
