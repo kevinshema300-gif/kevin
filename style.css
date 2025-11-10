@@ -1,0 +1,38 @@
+fieldset{
+    padding: 10px;
+    width:300px;
+    height: 400px;
+    margin-right: 600px;
+    margin-left: 600px;
+    border-radius: 20px;
+    border-color: green;
+    box-shadow: 40px;
+    font-size: 20px;
+    background-color: rgba(68, 0, 255, 0.7);
+    border: 90px;
+    margin-top: 60px auto;
+
+}
+h1{
+    margin-left: 200px;
+    color: blue;
+    container-type: unset;
+    
+}
+button{
+    border-radius: 30px;
+    box-sizing: border-box;
+    bottom: unset;
+    font-size: 20px;
+color:rgba(68, 0, 255, 0.7);
+}
+
+body{
+    background-image: url(d.jpg);
+    background-size: 900px;
+    
+}
+
+a{
+    text-decoration: none;
+}

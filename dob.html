@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="rw">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facebook Lite — Login</title>
+  <style>
+    /* Basic reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background:#f0f2f5;
+      color:#1c1e21;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+
+    /* Header (Facebook Lite style) */
+    .topbar{
+      background:#1877f2; /* Facebook blue */
+      color:white;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      box-shadow:0 1px 0 rgba(0,0,0,0.08);
+    }
+    .logo{
+      font-weight:700;
+      font-size:20px;
+      letter-spacing:-0.3px;
+    }
+    .tag{
+      font-size:13px;
+      opacity:0.95;
+    }
+
+    /* Center area */
+    .wrap{
+      flex:1; /* fills available space */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px 16px;
+    }
+
+    .card{
+      width:100%;
+      max-width:420px;
+      background:white;
+      border-radius:8px;
+      box-shadow:0 6px 18px rgba(16,24,40,0.08);
+      padding:22px;
+    }
+
+    h1{font-size:20px;margin-bottom:10px}
+    p.sub{color:#606770;font-size:14px;margin-bottom:18px}
+
+    .field{margin-bottom:14px}
+    label{display:block;margin-bottom:6px;font-size:13px;color:#385898}
+    input[type="text"], input[type="password"]{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid #ccd0d5;
+      border-radius:6px;
+      font-size:15px;
+      outline:none;
+      transition:box-shadow .15s, border-color .15s;
+      background:#fff;
+    }
+    input[type="text"]:focus, input[type="password"]:focus{
+      border-color:#8ab4f8;
+      box-shadow:0 0 0 3px rgba(24,119,242,0.08);
+    }
+
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+    .btn{
+      display:inline-block;
+      width:100%;
+      padding:10px 12px;
+      border-radius:6px;
+      font-weight:600;
+      font-size:15px;
+      background:#1877f2;
+      color:white;
+      border:none;
+      cursor:pointer;
+      box-shadow:0 2px 0 rgba(0,0,0,0.06);
+    }
+    .btn:active{transform:translateY(1px)}
+
+    .small{font-size:13px;color:#666}
+    .link-like{color:#1877f2;text-decoration:none;font-weight:600}
+
+    .status{margin-top:8px;font-size:13px;color:#d93025}
+
+    .footer-note{margin-top:16px;font-size:13px;color:#606770;text-align:center}
+
+    /* Responsive */
+    @media (max-width:420px){
+      .card{padding:16px}
+      .logo{font-size:18px}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">Facebook</div>
+    <div class="tag">Lite</div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" aria-labelledby="login-title">
+      <h1 id="login-title">Injira kuri Facebook Lite</h1>
+      <p class="sub">Injira ukoresheje email cyangwa nomero ya telefone hamwe na password yawe.</p>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="email">Email cyangwa Telefoni</label>
+          <input id="email" name="email" type="text" placeholder="wandika email cyangwa nomero" autocomplete="username" />
+        </div>
+
+        <div class="field">
+          <label for="password">Ijambo ry'ibanga</label>
+          <input id="password" name="password" type="password" placeholder="wandika ijambo ry'ibanga" autocomplete="current-password" />
+        </div>
+
+        <div class="field row">
+          <label style="display:flex;align-items:center;gap:8px;font-weight:500;">
+            <input id="remember" name="remember" type="checkbox" style="width:16px;height:16px;" />
+            <span class="small">Nzirikana (Remember me)</span>
+          </label>
+          <a href="#" class="link-like" id="forgot">Wibagiwe ijambo ry'ibanga?</a>
+        </div>
+
+        <div class="field">
+          <button class="btn" type="submit">Injira</button>
+          <div id="status" class="status" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="footer-note">Nta konti? <a href="#" class="link-like">Iyandikishe</a></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    // Simple client-side validation and demo behaviour
+    (function(){
+      const form = document.getElementById('loginForm');
+      const email = document.getElementById('email');
+      const password = document.getElementById('password');
+      const status = document.getElementById('status');
+      const forgot = document.getElementById('forgot');
+
+      function validateEmailOrPhone(value){
+        value = value.trim();
+        if(!value) return false;
+        // simple phone check (digits only, 7-15 chars) or email check
+        const phoneRe = /^\+?[0-9]{7,15}$/;
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return phoneRe.test(value) || emailRe.test(value);
+      }
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        status.textContent = '';
+
+        const u = email.value;
+        const p = password.value;
+
+        if(!validateEmailOrPhone(u)){
+          status.textContent = 'Inyandiko ya email/telefoni ntisobanutse.';
+          email.focus();
+          return;
+        }
+        if(p.trim().length < 6){
+          status.textContent = 'Ijambo ry\'ibanga rigomba kuba nibura inyuguti 6.';
+          password.focus();
+          return;
+        }
+
+        // Demo: show a small "logging in" animation and fake success
+        status.style.color = '#1877f2';
+        status.textContent = 'Kwinjira...';
+
+        // Simulate server call
+        setTimeout(()=>{
+          status.style.color = '#0f9d58';
+          status.textContent = 'Winjiye neza! (demo)';
+          // In a real app you would submit the form to your backend here
+          // e.g. fetch('/login', {method:'POST', body: JSON.stringify({...})})
+        }, 900);
+      });
+
+      forgot.addEventListener('click', function(e){
+        e.preventDefault();
+        alert('Ku rubuga rwuzuye, aha wajyanwa ku ipaji yo gusubiza ijambo ry\'ibanga.');
+      });
+
+    })();
+  </script>
+   <a href="login.html">login</a>
+   <a href="dob.html">dob</a>
+<a href="i.html">clear</a>
+<a href="kevin.html">kevin</a>
+</body>
+</html>

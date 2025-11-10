@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="rw">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ElectroOne — Dynamic Single-file Store</title>
+<meta name="description" content="Single-file dynamic electronic store (HTML/CSS/JS) - products, search, cart, admin (frontend only)" />
+<style>
+  /* ---------- RESET ---------- */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(180deg,#f6f9fc,#e8f1f8);color:#082032;line-height:1.45}
+  a{color:inherit;text-decoration:none}
+  button{cursor:pointer}
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:1200px;margin:18px auto;padding:18px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:12px;background:linear-gradient(90deg,#082032,#0b4260);color:#fff;position:sticky;top:10px;z-index:50;box-shadow:0 8px 30px rgba(2,8,20,0.12)}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#06b6d4,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;color:#021022}
+  nav a{margin:0 8px;padding:8px 10px;border-radius:8px;color:#cfeff6;font-weight:600}
+  nav a.active{background:rgba(255,255,255,0.06);color:#fff;box-shadow:inset 0 -3px 0 rgba(255,255,255,0.03)}
+
+  /* ---------- HERO ---------- */
+  .hero{display:flex;gap:18px;align-items:center;margin-top:18px;padding:26px;border-radius:12px;background:linear-gradient(90deg,#e6f7ff,rgba(255,255,255,0.6));overflow:hidden}
+  .hero-left{flex:1}
+  .hero h1{font-size:28px;color:#04263a;margin-bottom:8px}
+  .hero p{color:#0b3b47}
+  .hero-right{width:360px;max-width:40%;border-radius:12px;overflow:hidden}
+  .hero-right img{width:100%;display:block;height:220px;object-fit:cover}
+
+  /* ---------- CONTROLS ---------- */
+  .controls{display:flex;gap:10px;align-items:center;margin:18px 0;flex-wrap:wrap}
+  .controls input[type="search"]{flex:1;min-width:220px;padding:10px;border-radius:10px;border:1px solid rgba(6,22,33,0.06)}
+  .controls select, .controls button{padding:10px;border-radius:10px;border:1px solid rgba(6,22,33,0.06);background:white}
+  .controls .small{font-size:13px;color:#385a6b}
+
+  /* ---------- GRID ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .card{background:white;border-radius:12px;padding:12px;border:1px solid rgba(6,22,33,0.04);box-shadow:0 10px 30px rgba(2,8,16,0.04);display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s}
+  .card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(3,10,20,0.08)}
+  .card img{width:100%;height:150px;object-fit:cover;border-radius:8px}
+  .card h3{margin-top:10px;font-size:16px}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:#4b6b7c}
+  .price{font-weight:800;color:#0b3b47}
+
+  /* ---------- PRODUCT DETAIL ---------- */
+  .product-detail{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px}
+  .pd-media{flex:1;min-width:320px}
+  .pd-info{flex:1;min-width:320px;background:white;padding:16px;border-radius:12px;border:1px solid rgba(6,22,33,0.04);box-shadow:0 8px 20px rgba(2,8,20,0.04)}
+
+  /* ---------- CART DRAWER ---------- */
+  .cart-btn{background:linear-gradient(90deg,#06b6d4,#7c3aed);color:#021022;border-radius:10px;padding:10px 14px;border:0;font-weight:800}
+  .cart-drawer{position:fixed;right:22px;top:90px;width:360px;max-height:78vh;background:white;border-radius:12px;padding:12px;border:1px solid rgba(6,22,33,0.06);box-shadow:0 30px 80px rgba(2,8,20,0.15);overflow:auto;display:none;z-index:120}
+  .cart-drawer.open{display:block}
+  .cart-item{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(6,22,33,0.04)}
+  .cart-item img{width:64px;height:48px;object-fit:cover;border-radius:6px}
+  .cart-item .qty{display:flex;gap:6px;align-items:center}
+
+  /* ---------- MODAL ---------- */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,12,0.6);z-index:200}
+  .modal.open{display:flex}
+  .modal-card{width:90%;max-width:900px;background:white;padding:14px;border-radius:12px;overflow:auto}
+
+  /* ---------- ADMIN ---------- */
+  .admin-panel{background:white;padding:12px;border-radius:12px;border:1px solid rgba(6,22,33,0.04)}
+  .form-row{display:flex;gap:8px;flex-wrap:wrap}
+  .form-row input, .form-row textarea, .form-row select{padding:10px;border-radius:8px;border:1px solid rgba(6,22,33,0.06);flex:1}
+  table{width:100%;border-collapse:collapse}
+  table th, table td{padding:8px;border-bottom:1px solid rgba(6,22,33,0.04);text-align:left}
+
+  /* ---------- FOOTER ---------- */
+  footer{margin-top:30px;padding:18px;text-align:center;color:#37566a}
+
+  /* ---------- SMALL SCREENS ---------- */
+  @media (max-width:900px){
+    .hero{flex-direction:column;align-items:flex-start}
+    .hero-right{width:100%}
+    .cart-drawer{right:10px;width:90%}
+  }
+
+  /* ---------- SIMPLE ANIMATIONS ---------- */
+  @keyframes floaty { from{transform:translateY(0)} to{transform:translateY(-8px)} }
+  .floaty{animation:floaty 3s ease-in-out infinite alternate}
+  .fade-in{animation:fadeIn .6s ease both}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="logo">EO</div>
+      <div>
+        <div style="font-weight:800">ElectroOne</div>
+        <div style="font-size:12px;color:#bfeaf8">Online electronics marketplace</div>
+      </div>
+    </div>
+
+    <nav id="mainNav" aria-label="Main">
+      <a href="#home" data-route="home" class="nav-link">Home</a>
+      <a href="#store" data-route="store" class="nav-link">Store</a>
+      <a href="#about" data-route="about" class="nav-link">About</a>
+      <a href="#contact" data-route="contact" class="nav-link">Contact</a>
+      <a href="#admin" data-route="admin" class="nav-link">Admin</a>
+      <button id="openCart" class="cart-btn">🛒 Cart (<span id="cartCount">0</span>)</button>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-left">
+      <h1>ElectroOne — Ibyo ukeneye byose bya electronics</h1>
+      <p>Phones, Laptops, Accessories, na byinshi — reba, wongere muri cart, hanyuma ugenzure.</p>
+      <div style="margin-top:12px">
+        <a href="#store" class="cart-btn">Tangira Gura</a>
+      </div>
+    </div>
+    <div class="hero-right floaty">
+      <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1400&auto=format&fit=crop" alt="hero">
+    </div>
+  </section>
+
+  <!-- CONTROLS -->
+  <div id="controlsArea" class="controls fade-in" style="display:none">
+    <input id="searchInput" type="search" placeholder="Shakisha igicuruzwa (izina)" />
+    <select id="categoryFilter"><option value="">Byose</option></select>
+    <select id="sortBy"><option value="new">Sort: Default</option><option value="price-asc">Price low → high</option><option value="price-desc">Price high → low</option></select>
+    <button id="resetBtn">Reset</button>
+    <div class="small" style="margin-left:auto">Products: <span id="productsCount">0</span></div>
+  </div>
+
+  <!-- MAIN APP AREA (dynamic) -->
+  <main id="app" class="fade-in" style="margin-top:16px">
+    <!-- content injected by JS -->
+  </main>
+
+  <!-- CART DRAWER -->
+  <aside id="cartDrawer" class="cart-drawer" aria-hidden="true">
+    <h3 style="margin-bottom:8px">Cart</h3>
+    <div id="cartItems"></div>
+    <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+      <strong>Total:</strong> <div id="cartTotal">$0.00</div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button id="checkoutBtn" class="cart-btn" style="flex:1">Checkout</button>
+      <button id="clearCartBtn" class="" style="flex:1;border-radius:10px;padding:10px;border:1px solid rgba(6,22,33,0.06)">Clear</button>
+    </div>
+  </aside>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <div id="modalContent"></div>
+      <div style="margin-top:12px;text-align:right"><button onclick="closeModal()">Close</button></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© <span id="year"></span> ElectroOne — All rights reserved. Built with ❤️</p>
+  </footer>
+</div>
+
+<script>
+/* ================== APP: Single-file Dynamic Store ================== */
+
+/* ---------- Helpers ---------- */
+const qs = s => document.querySelector(s);
+const qsa = s => Array.from(document.querySelectorAll(s));
+const fmt = v => '$' + Number(v).toFixed(2);
+
+/* ---------- SAMPLE PRODUCTS (seed if none in localStorage) ---------- */
+const sampleProducts = [
+  { id: genId(), title: 'MacBook Air M2', category:'Laptops', price:1200, image:'https://m.media-amazon.com/images/I/71jG+e7roXL._AC_SL1500_.jpg', desc:'MacBook Air with Apple M2 chip.' },
+  { id: genId(), title: 'iPhone 15 Pro', category:'Phones', price:1099, image:'https://m.media-amazon.com/images/I/81CgtwSII3L._AC_SL1500_.jpg', desc:'Apple iPhone 15 Pro 256GB.' },
+  { id: genId(), title: 'Wireless Mouse', category:'Accessories', price:25, image:'https://m.media-amazon.com/images/I/61LtuGzXeaL._AC_SL1500_.jpg', desc:'Ergonomic bluetooth mouse.' },
+  { id: genId(), title: 'USB-C Cable 1m', category:'Cables', price:9.99, image:'https://m.media-amazon.com/images/I/51GZJpM5RRL._AC_SL1500_.jpg', desc:'Durable fast-charging cable.' },
+  { id: genId(), title: 'External SSD 1TB', category:'Accessories', price:129, image:'https://m.media-amazon.com/images/I/81NG3hI8p9L._AC_SL1500_.jpg', desc:'Portable high-speed SSD.' },
+  { id: genId(), title: '27" 144Hz Monitor', category:'Accessories', price:299, image:'https://m.media-amazon.com/images/I/71xvBnbF5WL._AC_SL1500_.jpg', desc:'Gaming monitor 144Hz.' }
+];
+
+// Utility: generate short id
+function genId(){ return 'p' + Math.random().toString(36).slice(2,9) }
+
+/* ---------- STORAGE ---------- */
+const STORE_KEY = 'eone_products_v1';
+const CART_KEY = 'eone_cart_v1';
+const ADMIN_KEY = 'eone_admin_session';
+
+/* load or seed */
+function loadProducts(){
+  const raw = localStorage.getItem(STORE_KEY);
+  if(!raw){ localStorage.setItem(STORE_KEY, JSON.stringify(sampleProducts)); return sampleProducts.slice(); }
+  try{ return JSON.parse(raw); } catch(e){ return sampleProducts.slice(); }
+}
+function saveProducts(list){ localStorage.setItem(STORE_KEY, JSON.stringify(list)); }
+
+function loadCart(){ return JSON.parse(localStorage.getItem(CART_KEY) || '{}'); }
+function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+
+/* ---------- STATE ---------- */
+let products = loadProducts();
+let cart = loadCart();
+let currentRoute = window.location.hash.replace('#','') || 'home';
+
+/* ---------- DOM refs ---------- */
+const app = qs('#app');
+const navLinks = qsa('.nav-link');
+const controlsArea = qs('#controlsArea');
+const searchInput = qs('#searchInput');
+const categoryFilter = qs('#categoryFilter');
+const sortBy = qs('#sortBy');
+const resetBtn = qs('#resetBtn');
+const productsCountEl = qs('#productsCount');
+const cartBtn = qs('#openCart');
+const cartDrawer = qs('#cartDrawer');
+const cartCountEl = qs('#cartCount');
+const cartItemsEl = qs('#cartItems');
+const cartTotalEl = qs('#cartTotal');
+const checkoutBtn = qs('#checkoutBtn');
+const clearCartBtn = qs('#clearCartBtn');
+const modal = qs('#modal');
+const modalContent = qs('#modalContent');
+const yearEl = qs('#year'); yearEl.textContent = new Date().getFullYear();
+
+/* ---------- RENDERING: ROUTES ---------- */
+function setActiveNav(route){
+  navLinks.forEach(a=> a.classList.toggle('active', a.getAttribute('data-route')===route));
+}
+
+function render(){
+  currentRoute = window.location.hash.replace('#','') || 'home';
+  setActiveNav(currentRoute);
+
+  // show/hide controls for store
+  controlsArea.style.display = (currentRoute==='store') ? 'flex' : 'none';
+
+  if(currentRoute==='home'){ renderHome(); }
+  else if(currentRoute==='store'){ renderStore(); }
+  else if(currentRoute==='about'){ renderAbout(); }
+  else if(currentRoute==='contact'){ renderContact(); }
+  else if(currentRoute==='admin'){ renderAdmin(); }
+  else { renderHome(); }
+  updateCartUI();
+}
+
+function renderHome(){
+  app.innerHTML = `
+    <section>
+      <h2 style="margin-bottom:8px">Welcome to ElectroOne</h2>
+      <p>Dynamic single-file e-commerce demo. Use the <strong>Store</strong> to browse items or <strong>Admin</strong> to manage products (frontend-only).</p>
+      <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap">
+        <a href="#store" class="cart-btn">Shop Now</a>
+        <a href="#admin" style="padding:10px;border-radius:10px;border:1px solid rgba(6,22,33,0.06);background:white">Open Admin</a>
+      </div>
+    </section>
+    <section style="margin-top:20px">
+      <h3>Featured</h3>
+      <div class="grid">${renderCards(products.slice(0,4))}</div>
+    </section>
+  `;
+}
+
+function renderStore(){
+  // populate categories
+  populateCategories();
+  // render filtered/sorted products based on controls
+  const query = searchInput.value.trim().toLowerCase();
+  const cat = categoryFilter.value;
+  const sort = sortBy.value;
+  let list = products.slice();
+  if(query) list = list.filter(p => p.title.toLowerCase().includes(query) || (p.desc||'').toLowerCase().includes(query));
+  if(cat) list = list.filter(p => p.category === cat);
+  if(sort==='price-asc') list.sort((a,b)=>a.price-b.price);
+  if(sort==='price-desc') list.sort((a,b)=>b.price-a.price);
+  productsCountEl.textContent = list.length;
+  app.innerHTML = `
+    <section>
+      <h2>Store</h2>
+      <div class="grid">${renderCards(list)}</div>
+    </section>
+  `;
+}
+
+function renderAbout(){
+  app.innerHTML = `
+    <section>
+      <h2>About ElectroOne</h2>
+      <p>ElectroOne is a demo single-file dynamic storefront. Built to show how a frontend-only store can work using localStorage for state, client-side routing, and admin management without server.</p>
+    </section>
+  `;
+}
+
+function renderContact(){
+  app.innerHTML = `
+    <section>
+      <h2>Contact</h2>
+      <p>Have questions? Use the form below (simulated).</p>
+      <form onsubmit="event.preventDefault();alert('Message sent (simulated).');this.reset();">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input required placeholder="Your name" style="flex:1;padding:10px;border-radius:8px;border:1px solid #ddd">
+          <input required type="email" placeholder="Email" style="flex:1;padding:10px;border-radius:8px;border:1px solid #ddd">
+        </div>
+        <textarea required placeholder="Message" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:8px"></textarea>
+        <button type="submit" style="margin-top:8px;padding:10px 14px;border-radius:8px;background:linear-gradient(90deg,#06b6d4,#7c3aed);border:0;color:#021022">Send</button>
+      </form>
+    </section>
+  `;
+}
+
+/* ---------- RENDER CARDS ---------- */
+function renderCards(list){
+  if(!list || list.length===0) return '<div style="padding:18px;color:#4b6b7c">No products found</div>';
+  return list.map(p=>`
+    <article class="card">
+      <img src="${p.image}" alt="${escapeHtml(p.title)}">
+      <h3>${escapeHtml(p.title)}</h3>
+      <div class="meta"><span class="small">${escapeHtml(p.category)}</span><span class="price">${fmt(p.price)}</span></div>
+      <p style="color:#385a6b;margin-top:8px">${escapeHtml(truncate(p.desc||'',80))}</p>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+        <button onclick="openDetail('${p.id}')" class="">View</button>
+        <button onclick="addToCart('${p.id}')" style="margin-left:auto;background:linear-gradient(90deg,#06b6d4,#7c3aed);color:#021022;padding:8px;border-radius:8px;border:0">Add to cart</button>
+      </div>
+    </article>
+  `).join('');
+}
+
+/* ---------- PRODUCT DETAIL MODAL ---------- */
+function openDetail(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  modalContent.innerHTML = `
+    <div class="product-detail">
+      <div class="pd-media"><img src="${p.image}" alt="${escapeHtml(p.title)}" style="width:100%;border-radius:10px"></div>
+      <div class="pd-info">
+        <h2>${escapeHtml(p.title)}</h2>
+        <p style="color:#4b6b7c">${escapeHtml(p.category)} • ${fmt(p.price)}</p>
+        <p style="margin-top:12px">${escapeHtml(p.desc||'No description')}</p>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button onclick="addToCart('${p.id}')" class="cart-btn">Add to cart</button>
+          <button onclick="closeModal()" style="padding:10px;border-radius:8px;border:1px solid rgba(6,22,33,0.06)">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+}
+function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); modalContent.innerHTML = ''; }
+
+/* ---------- CART FUNCTIONS ---------- */
+function addToCart(id){
+  cart = loadCartState();
+  cart[id] = (cart[id]||0) + 1;
+  saveCart(cart);
+  updateCartUI();
+  openCart();
+}
+
+function removeFromCart(id){
+  cart = loadCartState();
+  if(cart[id]) delete cart[id];
+  saveCart(cart);
+  updateCartUI();
+}
+
+function changeQty(id, delta){
+  cart = loadCartState();
+  if(!cart[id]) return;
+  cart[id] = cart[id] + delta;
+  if(cart[id] <= 0) delete cart[id];
+  saveCart(cart);
+  updateCartUI();
+}
+
+function clearCart(){
+  localStorage.removeItem(CART_KEY);
+  cart = {};
+  updateCartUI();
+}
+
+function loadCartState(){ return JSON.parse(localStorage.getItem(CART_KEY) || '{}'); }
+function saveCart(obj){ localStorage.setItem(CART_KEY, JSON.stringify(obj)); }
+
+function updateCartUI(){
+  cart = loadCartState();
+  const entries = Object.entries(cart);
+  cartCountEl.textContent = entries.reduce((s,[id,q]) => s + q ,0);
+  // render items
+  if(entries.length===0){ cartItemsEl.innerHTML = '<div style="color:#557588">Cart is empty</div>'; cartTotalEl.textContent = fmt(0); return; }
+  let total = 0;
+  cartItemsEl.innerHTML = entries.map(([id,qty])=>{
+    const p = products.find(x=>x.id===id);
+    if(!p) return '';
+    const line = p.price * qty; total += line;
+    return `
+      <div class="cart-item">
+        <img src="${p.image}" alt="${escapeHtml(p.title)}">
+        <div style="flex:1">
+          <div style="font-weight:700">${escapeHtml(p.title)}</div>
+          <div class="small">${fmt(p.price)} × ${qty} = <strong>${fmt(line)}</strong></div>
+          <div class="qty" style="margin-top:8px">
+            <button onclick="changeQty('${id}',-1)" style="padding:6px;border-radius:6px;border:1px solid rgba(6,22,33,0.06)">-</button>
+            <div style="padding:6px 10px;border-radius:6px;border:1px solid rgba(6,22,33,0.06)">${qty}</div>
+            <button onclick="changeQty('${id}',1)" style="padding:6px;border-radius:6px;border:1px solid rgba(6,22,33,0.06)">+</button>
+            <button onclick="removeFromCart('${id}')" style="margin-left:8px;padding:6px;border-radius:6px;border:1px solid rgba(6,22,33,0.06)">Remove</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  cartTotalEl.textContent = fmt(total);
+}
+
+/* ---------- CART DRAWER ACTIONS ---------- */
+function openCart(){ cartDrawer.classList.add('open'); cartDrawer.setAttribute('aria-hidden','false'); }
+function closeCart(){ cartDrawer.classList.remove('open'); cartDrawer.setAttribute('aria-hidden','true'); }
+
+/* ---------- CHECKOUT (SIMULATED) ---------- */
+checkoutBtn.addEventListener('click', ()=>{
+  cart = loadCartState();
+  const items = Object.entries(cart).map(([id,qty])=>{const p=products.find(x=>x.id===id); return `${p.title} x ${qty}`});
+  if(items.length===0){ alert('Cart is empty'); return; }
+  const ok = confirm('Confirm order? (Simulated).\\n\\n' + items.join('\\n'));
+  if(ok){
+    // simulate order saved (no backend) — clear cart
+    clearCart();
+    alert('Order placed (simulated). Thank you!');
+    closeCart();
+  }
+});
+clearCartBtn.addEventListener('click', ()=>{ if(confirm('Clear cart?')) clearCart(); });
+
+/* ---------- ADMIN (frontend only) ---------- */
+function renderAdmin(){
+  // simple session check
+  const session = localStorage.getItem(ADMIN_KEY);
+  if(!session){
+    // show login
+    app.innerHTML = `
+      <section>
+        <h2>Admin Login (frontend-only)</h2>
+        <p>Enter password to manage products (default: <strong>admin123</strong>)</p>
+        <form id="adminLoginForm">
+          <input id="adminPass" type="password" placeholder="Password" style="padding:10px;border-radius:8px;border:1px solid #ddd" required>
+          <div style="margin-top:8px">
+            <button type="submit" class="cart-btn">Login</button>
+            <a href="#home" style="margin-left:8px;padding:10px;border-radius:8px;border:1px solid rgba(6,22,33,0.06);background:white">Back</a>
+          </div>
+        </form>
+      </section>
+    `;
+    qs('#adminLoginForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const pass = qs('#adminPass').value;
+      if(pass === 'admin123'){ localStorage.setItem(ADMIN_KEY, '1'); render(); alert('Admin session started (frontend-only)'); }
+      else alert('Invalid password');
+    });
+    return;
+  }
+
+  // admin dashboard: list products + create form
+  app.innerHTML = `
+    <section>
+      <h2>Admin Dashboard</h2>
+      <div style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+        <button id="adminLogout" style="padding:8px;border-radius:8px;border:1px solid rgba(6,22,33,0.06)">Logout</button>
+        <button id="exportBtn" class="cart-btn">Export JSON</button>
+        <button id="importBtn" style="padding:8px;border-radius:8px;border:1px solid rgba(6,22,33,0.06)">Import JSON</button>
+      </div>
+
+      <div style="margin-top:12px" class="admin-panel">
+        <h3>Create / Edit Product</h3>
+        <form id="prodForm">
+          <div class="form-row" style="margin-bottom:8px">
+            <input name="title" placeholder="Title" required>
+            <input name="category" placeholder="Category">
+          </div>
+          <div class="form-row" style="margin-bottom:8px">
+            <input name="price" type="number" step="0.01" placeholder="Price" required>
+            <input name="image" placeholder="Image URL (or leave empty)">
+          </div>
+          <textarea name="desc" placeholder="Description" rows="3" style="margin-bottom:8px"></textarea>
+          <div style="display:flex;gap:8px">
+            <input type="hidden" name="id">
+            <button type="submit" class="cart-btn">Save</button>
+            <button type="button" id="resetFormBtn" style="padding:8px;border-radius:8px;border:1px solid rgba(6,22,33,0.06)">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <div style="margin-top:14px">
+        <h3>Products</h3>
+        <table>
+          <thead><tr><th>Title</th><th>Category</th><th>Price</th><th></th></tr></thead>
+          <tbody id="adminProducts"></tbody>
+        </table>
+      </div>
+    </section>
+  `;
+
+  // attach listeners
+  qs('#adminLogout').addEventListener('click', ()=>{ localStorage.removeItem(ADMIN_KEY); render(); });
+  qs('#exportBtn').addEventListener('click', ()=>{ const data = localStorage.getItem(STORE_KEY); downloadJSON(data, 'products.json'); });
+  qs('#importBtn').addEventListener('click', ()=>{ const json = prompt('Paste products JSON here (will replace current products):'); try{ const parsed = JSON.parse(json); if(Array.isArray(parsed)){ products = parsed; saveProducts(products); alert('Imported'); render(); } else alert('Invalid JSON array'); } catch(e){ alert('Invalid JSON'); } });
+
+  const form = qs('#prodForm');
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const fd = new FormData(form);
+    const id = fd.get('id') || '';
+    const title = (fd.get('title')||'').trim();
+    const category = (fd.get('category')||'').trim();
+    const price = parseFloat(fd.get('price')||0);
+    const image = (fd.get('image')||'').trim() || 'https://via.placeholder.com/400x300?text=No+Image';
+    const desc = (fd.get('desc')||'').trim();
+    if(!title || !price){ alert('Provide title and price'); return; }
+    if(id){
+      // update
+      products = products.map(p => p.id===id ? {...p, title, category, price, image, desc} : p);
+      saveProducts(products);
+      alert('Updated');
+      form.reset();
+      populateAdminProducts();
+    } else {
+      // create
+      const newP = { id: genId(), title, category, price, image, desc };
+      products.unshift(newP);
+      saveProducts(products);
+      alert('Created');
+      form.reset();
+      populateAdminProducts();
+    }
+  });
+
+  qs('#resetFormBtn').addEventListener('click', ()=> form.reset());
+
+  populateAdminProducts();
+}
+
+function populateAdminProducts(){
+  const tbody = qs('#adminProducts');
+  tbody.innerHTML = products.map(p=>`
+    <tr>
+      <td>${escapeHtml(p.title)}</td>
+      <td>${escapeHtml(p.category)}</td>
+      <td>${fmt(p.price)}</td>
+      <td>
+        <button onclick="editProduct('${p.id}')">Edit</button>
+        <button onclick="deleteProduct('${p.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+window.editProduct = function(id){
+  const p = products.find(x=>x.id===id); if(!p) return alert('Not found');
+  const form = qs('#prodForm');
+  form.title.value = p.title; form.category.value = p.category; form.price.value = p.price; form.image.value = p.image; form.desc.value = p.desc; form.id.value = p.id;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+window.deleteProduct = function(id){
+  if(!confirm('Delete product?')) return;
+  products = products.filter(p=>p.id!==id);
+  saveProducts(products);
+  populateAdminProducts();
+  alert('Deleted');
+}
+
+/* ---------- UTILITIES ---------- */
+function populateCategories(){
+  const cats = Array.from(new Set(products.map(p=>p.category).filter(Boolean)));
+  categoryFilter.innerHTML = '<option value=\"\">Byose</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+
+function truncate(s,n){ return s.length>n ? s.slice(0,n-1)+'…' : s }
+function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g, ch=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[ch]); }
+
+/* ---------- DOWNLOAD JSON ---------- */
+function downloadJSON(data, filename){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([data], {type:'application/json'}));
+  a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- EVENT BINDINGS ---------- */
+window.addEventListener('hashchange', ()=>{ products = loadProducts(); render(); });
+window.addEventListener('load', ()=>{ products = loadProducts(); render(); });
+
+searchInput.addEventListener('input', ()=>{ if(window.location.hash.replace('#','')!=='store') location.hash='store'; else renderStore(); });
+categoryFilter.addEventListener('change', ()=>{ renderStore(); });
+sortBy.addEventListener('change', ()=>{ renderStore(); });
+resetBtn.addEventListener('click', ()=>{ searchInput.value=''; categoryFilter.value=''; sortBy.value='new'; renderStore(); });
+
+cartBtn.addEventListener('click', ()=>{ if(cartDrawer.classList.contains('open')) closeCart(); else openCart(); });
+
+// close modal on background click or ESC
+modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') { closeModal(); if(cartDrawer.classList.contains('open')) closeCart(); } });
+
+/* ---------- INIT ---------- */
+function init(){
+  products = loadProducts();
+  updateCartUI();
+  populateCategories();
+  // show hero initially
+  if(!window.location.hash) location.hash = 'home';
+  render();
+}
+init();
+
+/* ---------- SAFE LOAD/STORE ---------- */
+function loadProducts(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || sampleProducts.slice(); }catch(e){ return sampleProducts.slice(); } }
+function saveProducts(list){ localStorage.setItem(STORE_KEY, JSON.stringify(list)); products = list; }
+
+/* ---------- SMALL HELP: open product view programmatically ---------- */
+window.openDetail = openDetail;
+
+/* ---------- Helper: format price ---------- */
+function fmt(v){ return '$' + Number(v).toFixed(2) }
+
+</script>
+</body>
+</html>
